@@ -1,4 +1,5 @@
 #include "employee.h"
+#include "creator_func.h"
 #include <iostream>
 #include <fstream> 
 #include <cstdlib>  
@@ -10,28 +11,24 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    const char* filename = argv[1];
-    int n = atoi(argv[2]);// количество записей
+    const char* filen = argv[1];
+    int n = atoi(argv[2]);
 
-    ofstream out(filename, ios::binary);
-    if (!out) {
-        cout << "Не удалось открыть файл!\n";
-        return 1;
-    }
-
-    employee e;
+    vector<employee> employees(n);
     for (int i = 0; i < n; i++) {
         cout << "Сотрудник " << i + 1 << endl;
         cout << "Введите идентификационный номер: ";
-        cin >> e.num;
+        cin >> employees[i].num;
         cout << "Введите имя: ";
-        cin >> e.name;
+        cin >> employees[i].name;
         cout << "Введите количество отработанных часов: ";
-        cin >> e.hours;
-
-        out.write((char*)&e, sizeof(employee)); // запись структуры в бин файл
+        cin >> employees[i].hours;
     }
 
-    out.close();
+    if (!writeEmployeesToFile(filen, employees)) {
+        cout << "Ошибка записи файла!\n";
+        return 1;
+    }
+
     return 0;
 }
