@@ -1,37 +1,50 @@
 #include "employee.h"
 #include <iostream>
 #include <windows.h>
-#include <iostream>
 #include <fstream>
-#include<string>
-#include <locale.h>
+#include <string>
+#include <conio.h>
+
 using namespace std;
 
 int main() {
     SetConsoleOutputCP(1251);
     SetConsoleCP(1251);
+
     string binF, reportF;
     int n;
     double pay;
+
     cout << "Введите имя бинарного файла: ";
     cin >> binF;
     cout << "Введите количество записей: ";
     cin >> n;
 
-    wstring cmdCreator = L"Creator.exe " + wstring(binF.begin(), binF.end()) + L" " + to_wstring(n);
-    wchar_t cmdLine[256];
-    wcscpy_s(cmdLine, 256, cmdCreator.c_str());
+    // Формируем командную строку как в примере
+    string cmdCreator = "Creator.exe " + binF + " " + to_string(n);
+    char cmdLine[256];
+    strcpy_s(cmdLine, cmdCreator.c_str());
 
-    STARTUPINFO si = { sizeof(si) };
+    // Как в примере: заполняем STARTUPINFO
+    STARTUPINFOA si;
     PROCESS_INFORMATION pi;
-    if (!CreateProcess(NULL, cmdLine, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
+    ZeroMemory(&si, sizeof(STARTUPINFOA));
+    si.cb = sizeof(STARTUPINFOA);
+
+    // Запускаем процесс как в примере
+    if (!CreateProcessA(NULL, cmdLine, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
         cout << "Ошибка запуска Creator\n";
+        cout << "Press any key to finish.\n";
+        _getch();
         return 1;
     }
-    WaitForSingleObject(pi.hProcess, INFINITE);
-    CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);
 
+    // Ждем завершения как в примере
+    WaitForSingleObject(pi.hProcess, INFINITE);
+    CloseHandle(pi.hThread);
+    CloseHandle(pi.hProcess);
+
+    // Выводим содержимое файла
     ifstream fin(binF, ios::binary);
     employee emp;
     cout << "\nСодержимое бинарного файла:\n";
@@ -45,17 +58,24 @@ int main() {
     cout << "Введите оплату за час: ";
     cin >> pay;
 
-    wstring cmdReporter = L"Reporter.exe " + wstring(binF.begin(), binF.end()) + L" " + wstring(reportF.begin(), reportF.end()) + L" " + to_wstring(pay);
-    wchar_t cmdR[256];
-    wcscpy_s(cmdR, 256, cmdReporter.c_str());
+    // Запускаем Reporter аналогично
+    string cmdReporter = "Reporter.exe " + binF + " " + reportF + " " + to_string(pay);
+    char cmdR[256];
+    strcpy_s(cmdR, cmdReporter.c_str());
 
-    if (!CreateProcess(NULL, cmdR, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
+    ZeroMemory(&si, sizeof(STARTUPINFOA));
+    si.cb = sizeof(STARTUPINFOA);
+
+    if (!CreateProcessA(NULL, cmdR, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
         cout << "Ошибка запуска Reporter\n";
+        cout << "Press any key to finish.\n";
+        _getch();
         return 1;
     }
+
     WaitForSingleObject(pi.hProcess, INFINITE);
-    CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
+    CloseHandle(pi.hProcess);
 
     ifstream frep(reportF);
     cout << "\nСодержимое отчета:\n";
@@ -65,5 +85,7 @@ int main() {
     }
     frep.close();
 
+    cout << "Press any key to finish.\n";
+    _getch();
     return 0;
 }
