@@ -10,19 +10,26 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_library(lab2_core
     src/core.cpp
     src/wrappers/MinMaxWrapper.cpp
-    src/wrappers/AverageWrapper.cpp)
+    src/wrappers/AverageWrapper.cpp 
+    src/wrappers/AverageWrapper_th.cpp
+    src/wrappers/MinMaxWrapper_th.cpp )
 target_include_directories(lab2_core PUBLIC src)
 
 # EXECUTABLE (главная программа)
 add_executable(lab2_exec
     src/lab2_os1.cpp
-)
+ )
 target_link_libraries(lab2_exec PRIVATE lab2_core)
+
+# EXECUTABLE (главная программа std::thread)
+add_executable(lab2_exec_th
+    src/lab2_os_th.cpp
+)
+target_link_libraries(lab2_exec_th PRIVATE lab2_core)
 
 # TESTS (отдельный exe для doctest)
 add_executable(lab2_tests
-    tests/tests_core.cpp
-)
+    tests/tests_core.cpp)
 target_include_directories(lab2_tests PRIVATE src doctest) 
 target_link_libraries(lab2_tests PRIVATE lab2_core)
 

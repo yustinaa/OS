@@ -19,6 +19,5 @@ DWORD WINAPI AverageThread(LPVOID lpParam) {
     }
 
     params->average = sum/a.size();
-    //cout << "Average: " << params->average << endl;
     return 0;
 }
