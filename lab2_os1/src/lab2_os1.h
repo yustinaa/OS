@@ -4,6 +4,5 @@
 #pragma once
 
 #include <iostream>
-using namespace std;
 
 // TODO: установите здесь ссылки на дополнительные заголовки, требующиеся для программы.

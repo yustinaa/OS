@@ -1,12 +1,11 @@
 #include "MinMaxWrapper.h"
 #include "../core.h"
-#include "../utils.h"
 #include <iostream>
 using namespace std;
 
 DWORD WINAPI MinMaxThread(LPVOID lpParam) {
     MinMaxParams* params = static_cast<MinMaxParams*>(lpParam);
-    if (!params || !params->array) return Constants::EXIT_CODE_OK;
+    if (!params || !params->array) return 0;
 
     vector<int>& a = *params->array;
     int min_v = a[0];
@@ -22,12 +21,12 @@ DWORD WINAPI MinMaxThread(LPVOID lpParam) {
         {
             max_v = val;
         }
-        Sleep(Constants::SLEEP_MIN_MAX_MS);
+        Sleep(7);
     }
 
     params->min = min_v;
     params->max = max_v;
 
     //cout << "Min: " << min_v << ", Max: " << max_v << endl;
-    return Constants::EXIT_CODE_OK;
+    return 0;
 }

@@ -10,13 +10,23 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_library(lab2_core
     src/core.cpp
     src/wrappers/MinMaxWrapper.cpp
-    src/wrappers/AverageWrapper.cpp
- "src/utils.h")
+    src/wrappers/AverageWrapper.cpp)
 target_include_directories(lab2_core PUBLIC src)
 
 # EXECUTABLE (главная программа)
 add_executable(lab2_exec
     src/lab2_os1.cpp
- "src/utils.h")
+)
 target_link_libraries(lab2_exec PRIVATE lab2_core)
+
+# TESTS (отдельный exe для doctest)
+add_executable(lab2_tests
+    tests/tests_core.cpp
+)
+target_include_directories(lab2_tests PRIVATE src doctest) 
+target_link_libraries(lab2_tests PRIVATE lab2_core)
+
+# Регистрируем тест для CTest
+enable_testing()
+add_test(NAME lab2_run_tests COMMAND lab2_tests)
 
