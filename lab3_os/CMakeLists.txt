@@ -1,15 +1,24 @@
-﻿# CMakeList.txt: файл проекта CMake верхнего уровня; проведите глобальную конфигурацию
-# и включите сюда подпроекты.
+﻿# CMakeList.txt: проект CMake для lab3_os; включите исходный код и определения,
+# укажите здесь логику для конкретного проекта.
 #
-cmake_minimum_required (VERSION 3.8)
 
-# Включение горячей перезагрузки для компиляторов MSVC, если поддерживается.
-if (POLICY CMP0141)
-  cmake_policy(SET CMP0141 NEW)
-  set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
+# Добавьте источник в исполняемый файл этого проекта.
+add_executable(lab3_os
+    src/lab3_os.cpp
+    src/marker_thread.cpp
+    src/sync.cpp
+    src/lab3_os.h
+    src/marker_thread.h
+    src/sync.h
+ )
+ add_executable(tests
+    src/tests_lab3.cpp   
+    src/marker_thread.cpp
+    src/sync.cpp
+)
+target_include_directories(tests PRIVATE src)
+if (CMAKE_VERSION VERSION_GREATER 3.12)
+  set_property(TARGET lab3_os PROPERTY CXX_STANDARD 20)
 endif()
 
-project ("lab3_os")
-
-# Включите подпроекты.
-add_subdirectory ("lab3_os")
+# TODO: Добавьте тесты и целевые объекты, если это необходимо.

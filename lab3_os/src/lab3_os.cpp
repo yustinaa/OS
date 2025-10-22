@@ -75,11 +75,9 @@ int main() {
                 }
             }
 
-            // сброс флагов ожидания
             syncManager.resetAllMarkerWaiting();
         }
 
-        // финальная остановка всех оставшихся маркеров
         for (int i = 0; i < markerCount; ++i) {
             if (!(*stopFlags[i])) {
                 *stopFlags[i] = true;
