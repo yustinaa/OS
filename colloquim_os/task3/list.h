@@ -24,6 +24,8 @@ public:
         }
     }
 
+    const Node* getHead() const { return head; }
+
     void add_el(int n) {
         Node* newNode = new Node(n);
         if (!head) {
