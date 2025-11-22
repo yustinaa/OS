@@ -3,60 +3,66 @@
 #include <iostream>
 #include<vector>
 #include <windows.h>
-#include<vector>
+#include<string>
 using namespace std;
 
-DWORD WINAPI markerThread(LPVOID params) {
-    ThreadParams* threadParams = static_cast<ThreadParams*>(params);
-    int markerId = threadParams->markerId;
-    vector<int>& array = *(threadParams->array);
-    SyncManager& syncManager = *(threadParams->syncManager);
-    bool& stopFlag = *(threadParams->stopFlag);
+DWORD WINAPI markerThread(LPVOID param) {
+    ThreadParams* p = static_cast<ThreadParams*>(param);
+    int id = p->markerId;
+    std::vector<int>& arr = *p->array;
 
-    syncManager.waitForStart();
+    HANDLE startEvent = p->startEvent;
+    HANDLE resumeEvent = p->continueEvent;
+    HANDLE stopEvent = p->stopEvent;
+    HANDLE doneEvent = p->finishedEvent;
+    HANDLE arrayMutex = p->arrayMutex;
+    CRITICAL_SECTION* cs = p->cs;
 
-    srand(markerId);
-    int markedCount = 0;
+    std::vector<int> marked;
+    srand(id);
 
-    while (!stopFlag) {
-        int randomNum = rand();
-        int index = randomNum % array.size();
+    WaitForSingleObject(startEvent, INFINITE);
 
-        WaitForSingleObject(syncManager.markerMutexes[markerId - 1], INFINITE);
+    while (true) {
+        int index = rand() % arr.size();
 
-        if (array[index] == 0) {
+        WaitForSingleObject(arrayMutex, INFINITE);
+
+        if (arr[index] == 0) {
             Sleep(5);
-            array[index] = markerId;
+            arr[index] = id;
+            marked.push_back(index);
             Sleep(5);
-            markedCount++;
-            ReleaseMutex(syncManager.markerMutexes[markerId - 1]);
+            ReleaseMutex(arrayMutex);
+            continue;
+        }
+
+        ReleaseMutex(arrayMutex);
+
+
+        EnterCriticalSection(cs);
+       
+        p->messages.push_back("[Marker " + std::to_string(id) + "] can't mark index "
+            + std::to_string(index) + ", total marked: "
+            + std::to_string(marked.size()));
+        LeaveCriticalSection(cs);
+
+        SetEvent(doneEvent);
+
+        HANDLE events[2] = { resumeEvent, stopEvent };
+        DWORD res = WaitForMultipleObjects(2, events, FALSE, INFINITE);
+
+        if (res == WAIT_OBJECT_0 + 1) { // stop
+            WaitForSingleObject(arrayMutex, INFINITE);
+            for (int idx : marked) arr[idx] = 0;
+            ReleaseMutex(arrayMutex);
+            return 0;
         }
         else {
-            ReleaseMutex(syncManager.markerMutexes[markerId - 1]);
 
-            std::cout << "Marker " << markerId
-                << ": marked " << markedCount
-                << " elements, cannot mark index " << index << std::endl;
-
-            syncManager.signalMarkerWaiting(markerId - 1);
-
-            syncManager.waitForContinue(markerId - 1);
-
-            if (stopFlag) {
-                syncManager.enterCriticalSection();
-                for (size_t i = 0; i < array.size(); ++i) {
-                    if (array[i] == markerId) array[i] = 0;
-                }
-                syncManager.leaveCriticalSection();
-
-                syncManager.markStopped(markerId - 1);
-                break;
-            }
-            else {
-                syncManager.signalMarkerWaiting(markerId - 1);
-            }
+            ResetEvent(doneEvent);
         }
     }
-
-    return 0;
 }
+
+

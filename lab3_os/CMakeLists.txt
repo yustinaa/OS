@@ -6,7 +6,6 @@
 add_executable(lab3_os
     src/lab3_os.cpp
     src/marker_thread.cpp
-    src/sync.cpp
     src/lab3_os.h
     src/marker_thread.h
     src/sync.h
@@ -14,7 +13,7 @@ add_executable(lab3_os
  add_executable(tests
     src/tests_lab3.cpp   
     src/marker_thread.cpp
-    src/sync.cpp
+    
 )
 target_include_directories(tests PRIVATE src)
 if (CMAKE_VERSION VERSION_GREATER 3.12)
