@@ -1,0 +1,23 @@
+### Создание задачи
+POST http://localhost:8080/tasks
+Content-Type: application/json
+
+{
+  "title": "Купить кефир",
+  "description": "3.2% жирности",
+  "status": "todo"
+}
+
+### Получить все задачи
+GET http://localhost:8080/tasks
+
+### Удалить задачу номер 2
+DELETE http://localhost:8080/tasks/2
+
+### Обновить статус задачи номер 3
+PATCH http://localhost:8080/tasks/3
+Content-Type: application/json
+
+{
+  "status": "done"
+}
