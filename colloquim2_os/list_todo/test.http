@@ -3,8 +3,8 @@ POST http://localhost:8080/tasks
 Content-Type: application/json
 
 {
-  "title": "Купить кефир",
-  "description": "3.2% жирности",
+  "title": "Купить молоко",
+  "description": "дата производства - сегодня/вчера",
   "status": "todo"
 }
 

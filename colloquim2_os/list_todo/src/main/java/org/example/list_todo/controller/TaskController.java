@@ -1,41 +1,60 @@
 package org.example.list_todo.controller;
 
 import org.example.list_todo.model.Task;
+import org.example.list_todo.repository.TaskRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import java.util.ArrayList;
+import org.springframework.web.server.ResponseStatusException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 @RestController
 @RequestMapping("/tasks")
 public class TaskController {
 
-    private List<Task> tasks = new ArrayList<>();
-    private AtomicLong idCounter = new AtomicLong();
+    private static final Logger logger = LoggerFactory.getLogger(TaskController.class);
+    @Autowired
+    private TaskRepository taskRepository;
 
     @GetMapping
     public List<Task> getAllTasks() {
-        return tasks;
+        logger.info("Вывод всех задач");
+        return taskRepository.findAll();
     }
 
-    @PostMapping
-    public Task createTask(@RequestBody Task newTask) {
-        newTask.setId(idCounter.incrementAndGet());
-        tasks.add(newTask);
-        return newTask;
-    }
-
-    // ПОЛУЧЕНИЕ ПО ID
     @GetMapping("/{id}")
     public Task getTask(@PathVariable Long id) {
-        return tasks.stream()
-                .filter(t -> t.getId().equals(id))
-                .findFirst()
-                .orElse(null); // Если не нашли, вернем пустоту (пока так)
+        logger.info("Поиск задачи с ID: {}", id);
+        return taskRepository.findById(id)
+                .orElseThrow(() -> {
+                    logger.error("Задача с ID {} не найдена!", id);
+                    return new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found");
+                });
     }
+    @PostMapping
+    public Task createTask(@RequestBody Task newTask) {
+        logger.info("Запрос на создание задачи: {}", newTask.getTitle());
+        return taskRepository.save(newTask);
+    }
+
     @DeleteMapping("/{id}")
     public void deleteTask(@PathVariable Long id) {
-        // Удаляем задачу, у которой ID совпадает с тем, что пришел в запросе
-        tasks.removeIf(t -> t.getId().equals(id));
+        logger.warn("Удаление задачи с ID: {}", id);
+        taskRepository.deleteById(id);
+    }
+
+    @PatchMapping("/{id}")
+    public Task updateTaskStatus(@PathVariable Long id, @RequestBody Task taskDetails) {
+        logger.info("Поиск задачи с ID: {}", id);
+        Task existingTask = taskRepository.findById(id)
+                .orElseThrow(() -> {
+                    logger.error("Задача с ID {} не найдена!", id);
+                    return new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found");
+                });
+        existingTask.setStatus(taskDetails.getStatus());
+        return taskRepository.save(existingTask);
     }
 }

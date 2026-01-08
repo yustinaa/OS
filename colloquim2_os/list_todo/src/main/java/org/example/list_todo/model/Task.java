@@ -1,10 +1,19 @@
 package org.example.list_todo.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
 public class Task {
-        private Long id;
-        private String title;
-        private String description;
-        private String status;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String title;
+    private String description;
+    private String status;
 
         public Task() {}
     public Task(Long id, String title, String description, String status) {
